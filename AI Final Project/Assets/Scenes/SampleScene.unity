@@ -134,8 +134,10 @@ GameObject:
   - component: {fileID: 453368878}
   - component: {fileID: 453368877}
   - component: {fileID: 453368876}
+  - component: {fileID: 453368881}
   - component: {fileID: 453368875}
   - component: {fileID: 453368879}
+  - component: {fileID: 453368880}
   m_Layer: 0
   m_Name: Dino Boi
   m_TagString: Untagged
@@ -249,7 +251,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 453368874}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.02, y: 3.7, z: -5.524481}
+  m_LocalPosition: {x: -7.02, y: 1.69, z: -5.524481}
   m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -270,6 +272,46 @@ MonoBehaviour:
   jumpVelocity: 7
   fallMultiplier: 3
   lowJumpMultiplier: 2
+--- !u!114 &453368880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 453368874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c7a75a96561c2149ac6e0299a7c7cdc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  normalBox: {fileID: 453368876}
+  crouchBox: {fileID: 453368881}
+--- !u!61 &453368881
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 453368874}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: -0.485}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 2.59, y: 1.94}
+    newSize: {x: 2.59, y: 1.94}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 2.59, y: 0.97}
+  m_EdgeRadius: 0
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -431,7 +473,7 @@ Transform:
   m_GameObject: {fileID: 544413896}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.31, y: -0.25, z: -5.524481}
-  m_LocalScale: {x: 300, y: 3.4875, z: 1}
+  m_LocalScale: {x: 300, y: 9.547031, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
