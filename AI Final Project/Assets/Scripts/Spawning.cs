@@ -30,7 +30,7 @@ public class Spawning : MonoBehaviour
     {
         // Makes it easier to make use of the original time set manually by copying it over to another value
         timeGap = startTimer;
-        timeGapOff = startTimer / offset;
+        timeGapOff = startTimer * offset;
     }
 
     // Update is called once per frame
