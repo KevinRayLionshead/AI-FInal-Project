@@ -153,8 +153,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   startTimer: 2
-  offset: 2
   cactus: {fileID: 8878661031367897462, guid: 22c7d7f6f0d502d47af2e5c6f5d8ed8e, type: 3}
+  doubleCactus: {fileID: 8878661031367897462, guid: f4f508d7c8f78df45af79c11157b2154,
+    type: 3}
   bird: {fileID: 3104867004849235562, guid: 383e07ea26f72264e94e0a8a0336ad97, type: 3}
 --- !u!4 &414748333
 Transform:
@@ -237,7 +238,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 2.59, y: 1.94}
+  m_Size: {x: 2.59, y: 1.95}
   m_EdgeRadius: 0
 --- !u!212 &453368877
 SpriteRenderer:
@@ -333,6 +334,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   normalBox: {fileID: 453368876}
   crouchBox: {fileID: 453368881}
+  tallDino: {fileID: 21300000, guid: b493054147b5d5a4b81c615f1d0c4445, type: 3}
+  crouchDino: {fileID: 21300000, guid: 20f25f0df0a15b9489c818e898c40c9a, type: 3}
 --- !u!61 &453368881
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -357,7 +360,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 2.59, y: 0.97}
+  m_Size: {x: 2.59, y: 0.96}
   m_EdgeRadius: 0
 --- !u!1 &519420028
 GameObject:
@@ -714,7 +717,7 @@ PrefabInstance:
     - target: {fileID: 32766051263001092, guid: 22c7d7f6f0d502d47af2e5c6f5d8ed8e,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.9
+      value: 0.82
       objectReference: {fileID: 0}
     - target: {fileID: 32766051263001092, guid: 22c7d7f6f0d502d47af2e5c6f5d8ed8e,
         type: 3}

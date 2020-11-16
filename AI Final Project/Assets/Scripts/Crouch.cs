@@ -8,46 +8,50 @@ public class Crouch : MonoBehaviour
 {
     Rigidbody2D rigidbody2D;
 
-    [SerializeField]
+    [SerializeField]//the different colliders for crouching and standing
     BoxCollider2D normalBox;
     [SerializeField]
     BoxCollider2D crouchBox;
 
-    Vector2 normalSize;
-    Vector2 crouchSize;
+    SpriteRenderer spriteRenderer;//to change the sprite for crouch and jumping
 
-    Vector2 normalPos;
-    Vector2 crouchPos;
+    [SerializeField]
+    Sprite tallDino;//standing sprite
+    [SerializeField]
+    Sprite crouchDino;//crouch sprite
 
     // Start is called before the first frame update
     void Start()
     {
-        rigidbody2D = GetComponent<Rigidbody2D>();
+        rigidbody2D = GetComponent<Rigidbody2D>();//sets components to the attached ones
+        spriteRenderer = GetComponent<SpriteRenderer>();
 
         normalBox.enabled = true;
         crouchBox.enabled = false;
-
-        normalSize = new Vector2(transform.localScale.x, transform.localScale.y);
-        crouchSize = new Vector2(normalSize.x, normalSize.y * 0.5f);
-
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.C) && rigidbody2D.velocity.y == 0.0f)
+        if (Input.GetKey(KeyCode.C) && rigidbody2D.velocity.y == 0.0f)//where crouch is toggled, has to be on ground
         {
-            normalBox.enabled = false;
+            spriteRenderer.sprite = crouchDino;//changes sprite to crouch 
+            normalBox.enabled = false;//swaps colliderboxes
             crouchBox.enabled = true;
-            //transform.localScale = crouchSize;
-            //transform.position = new Vector2(transform.position.x, transform.position.y + (transform.position.y * 0.5f)); 
         }
-        else if (!Input.GetKey(KeyCode.C) || rigidbody2D.velocity.y != 0.0f)
+        else if (!Input.GetKey(KeyCode.C) || rigidbody2D.velocity.y != 0.0f)//untoggled crouch
         {
-            normalBox.enabled = true;
+            spriteRenderer.sprite = tallDino;//changes sprite to standing
+            normalBox.enabled = true;//swaps collider boxes back
             crouchBox.enabled = false;
-            //transform.localScale = normalSize;
-            //transform.position = new Vector2(transform.position.x, transform.position.y - (transform.position.y * 2.0f));
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.tag == "enemy")
+        {
+            Debug.Log("bonked");
         }
     }
 }
