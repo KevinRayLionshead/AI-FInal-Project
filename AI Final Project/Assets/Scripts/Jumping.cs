@@ -16,6 +16,15 @@ public class Jumping : MonoBehaviour
 
     bool jump = false;
 
+    public bool GetJump()
+    {
+        return jump;
+    }
+    public void SetJump(bool b)
+    {
+        jump = b;
+    }
+
     // Start is called before the first frame update
     void Start()
     {

@@ -8,6 +8,9 @@ using MathNet.Numerics.LinearAlgebra;
 
 public class AI : MonoBehaviour
 {
+    Jumping jumping;
+    Crouch crouch;
+
     int numOfSteps = 6000;
     int counter = 0;
 
@@ -73,9 +76,22 @@ public class AI : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        jumping = gameObject.GetComponent<Jumping>();
+        crouch = gameObject.GetComponent<Crouch>();
+
         pMatrix = Matrix<float>.Build.Dense(numOfStates, numOfStates);
         identity = Matrix<float>.Build.DenseIdentity(numOfStates);
         Debug.Log(identity);
+
+        stateList = new List<State>();
+
+        Samples temp;
+        temp.curState = new List<State>();
+        temp.action = new List<Action>();
+        temp.nextState = new List<State>();
+        temp.freq = new List<int>();
+
+        samples = temp;
 
         states = Vector<float>.Build.Dense(numOfStates);
         rewards = Vector<float>.Build.Dense(numOfStates);
@@ -242,6 +258,12 @@ public class AI : MonoBehaviour
                 }
 
                 //Getter functions here for obj in front, wide obj and dead.
+
+                //nextState.jumping = jumping.GetJump();
+                //nextState.ducking = crouch.GetCrouch();
+
+
+
 
                 int k = stateList.IndexOf(nextState);
 

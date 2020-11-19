@@ -20,9 +20,23 @@ public class Crouch : MonoBehaviour
     [SerializeField]
     Sprite crouchDino;//crouch sprite
 
+    bool crouch;
+
+    public bool GetCrouch()
+    {
+        return crouch;
+    }
+    public void SetCrouch(bool b)
+    {
+        crouch = b;
+    }
+
+
     // Start is called before the first frame update
     void Start()
     {
+        bool crouch = false;
+
         rigidbody2D = GetComponent<Rigidbody2D>();//sets components to the attached ones
         spriteRenderer = GetComponent<SpriteRenderer>();
 
@@ -38,12 +52,14 @@ public class Crouch : MonoBehaviour
             spriteRenderer.sprite = crouchDino;//changes sprite to crouch 
             normalBox.enabled = false;//swaps colliderboxes
             crouchBox.enabled = true;
+            crouch = true;
         }
         else if (!Input.GetKey(KeyCode.C) || rigidbody2D.velocity.y != 0.0f)//untoggled crouch
         {
             spriteRenderer.sprite = tallDino;//changes sprite to standing
             normalBox.enabled = true;//swaps collider boxes back
             crouchBox.enabled = false;
+            crouch = false;
         }
     }
 
