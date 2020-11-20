@@ -20,16 +20,31 @@ public class Spawning : MonoBehaviour
     public GameObject doubleCactus;
     public GameObject bird;
 
+    public List<GameObject> gameObjects;
+
     // Start is called before the first frame update
     void Start()
     {
         // Makes it easier to make use of the original time set manually by copying it over to another value
         timeGap = startTimer;
+        gameObjects = new List<GameObject>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        for (int i = 0; i < gameObjects.Count; i++)
+        {
+            if (gameObjects[i].transform.position.x < -9.5)
+            {
+                GameObject tempGameObj = gameObjects[i];
+                gameObjects.RemoveAt(i);
+                Destroy(tempGameObj);
+                break;
+            }
+        }
+
+
         // Will keep counting down if still above zero
         if (timeGap > 0)
         {
@@ -40,7 +55,7 @@ public class Spawning : MonoBehaviour
         else if (timeGap <= 0)
         {
             // Randomizes a 0 or a 1 or a 2 value
-            rand = Random.Range(0, 3);
+            rand = Random.Range(0, 2);
 
             // Spawn a cactus if 0
             if (rand == 0)
@@ -50,28 +65,28 @@ public class Spawning : MonoBehaviour
 
                 //spawn cactus if 0
                 if (rand == 0)
-                    Instantiate(cactus, new Vector3(9.5f, 0.82f, 0), Quaternion.identity);
+                    gameObjects.Add(Instantiate(cactus, new Vector3(9.5f, 0.82f, 0), Quaternion.identity));
 
                 //spawn cactus if 1
                 if (rand == 1)
-                    Instantiate(doubleCactus, new Vector3(9.5f, 0.82f, 0), Quaternion.identity);
+                    gameObjects.Add(Instantiate(doubleCactus, new Vector3(9.5f, 0.82f, 0), Quaternion.identity));
             }
             // Spawn a bird if 1
-            else if (rand == 1)
+            else if (rand == 2)
             {
                 // Randomize a 0 or 1 value
                 rand = Random.Range(0, 2);
 
                 // Spawn the bird low if 0
-                if (rand == 0)
-                    Instantiate(bird, new Vector3(9.5f, 1.5f, 0), Quaternion.identity);
+                //if (rand == 0)
+                //    gameObjects.Add(Instantiate(bird, new Vector3(9.5f, 1.5f, 0), Quaternion.identity));
 
-                // Spawn the bird high if 1
-                if (rand == 1)
-                    Instantiate(bird, new Vector3(9.5f, 3.5f, 0), Quaternion.identity);
+                //// Spawn the bird high if 1
+                //if (rand == 1)
+                //    gameObjects.Add(Instantiate(bird, new Vector3(9.5f, 3.5f, 0), Quaternion.identity));
             }
             //spawn bird cactus combo
-            else if (rand == 2)
+            else if (rand == 1)
             {
                 // Randomize a 0 or 1 value
                 rand = Random.Range(0, 2);
@@ -79,15 +94,15 @@ public class Spawning : MonoBehaviour
                 // Spawn high bird and single cactus
                 if (rand == 0)
                 {
-                    Instantiate(cactus, new Vector3(9.5f, 0.82f, 0), Quaternion.identity);
-                    Instantiate(bird, new Vector3(9.5f, 4.0f, 0), Quaternion.identity);
+                    gameObjects.Add(Instantiate(cactus, new Vector3(9.5f, 0.82f, 0), Quaternion.identity));
+                    //gameObjects.Add(Instantiate(bird, new Vector3(9.5f, 4.0f, 0), Quaternion.identity));
                 }
 
                 // Spawn low bird and couple cactus
                 if (rand == 1)
                 {
-                    Instantiate(doubleCactus, new Vector3(9.5f, 0.82f, 0), Quaternion.identity);
-                    Instantiate(bird, new Vector3(9.75f, 1.8f, 0), Quaternion.identity);
+                    gameObjects.Add(Instantiate(doubleCactus, new Vector3(9.5f, 0.82f, 0), Quaternion.identity));
+                    //gameObjects.Add(Instantiate(bird, new Vector3(9.75f, 1.8f, 0), Quaternion.identity));
                 }
             }
             // Reset the timer to the original value

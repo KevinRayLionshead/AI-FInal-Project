@@ -11,7 +11,7 @@ public class Crouch : MonoBehaviour
     [SerializeField]//the different colliders for crouching and standing
     BoxCollider2D normalBox;
     [SerializeField]
-    BoxCollider2D crouchBox;
+    public BoxCollider2D crouchBox;
 
     SpriteRenderer spriteRenderer;//to change the sprite for crouch and jumping
 
@@ -20,22 +20,26 @@ public class Crouch : MonoBehaviour
     [SerializeField]
     Sprite crouchDino;//crouch sprite
 
-    bool crouch;
+    bool crouchKey;
+    public bool dead;
+
+    public GameObject hazardManager;
 
     public bool GetCrouch()
     {
-        return crouch;
+        return crouchKey;
     }
     public void SetCrouch(bool b)
     {
-        crouch = b;
+        crouchKey = b;
     }
 
 
     // Start is called before the first frame update
     void Start()
     {
-        bool crouch = false;
+        crouchKey = false;
+        dead = false;
 
         rigidbody2D = GetComponent<Rigidbody2D>();//sets components to the attached ones
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -47,27 +51,41 @@ public class Crouch : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.C) && rigidbody2D.velocity.y == 0.0f)//where crouch is toggled, has to be on ground
+        if ((Input.GetKey(KeyCode.C) || crouchKey) && rigidbody2D.velocity.y == 0.0f)//where crouch is toggled, has to be on ground
         {
             spriteRenderer.sprite = crouchDino;//changes sprite to crouch 
             normalBox.enabled = false;//swaps colliderboxes
             crouchBox.enabled = true;
-            crouch = true;
+            
         }
-        else if (!Input.GetKey(KeyCode.C) || rigidbody2D.velocity.y != 0.0f)//untoggled crouch
+        else if (!Input.GetKey(KeyCode.C) || !crouchKey || rigidbody2D.velocity.y != 0.0f)//untoggled crouch
         {
             spriteRenderer.sprite = tallDino;//changes sprite to standing
             normalBox.enabled = true;//swaps collider boxes back
             crouchBox.enabled = false;
-            crouch = false;
+            
+        }
+
+        if(dead)
+        {
+            for (int i = 0; i < hazardManager.GetComponent<Spawning>().gameObjects.Count; i++)
+            {
+                Destroy(hazardManager.GetComponent<Spawning>().gameObjects[i]);
+                
+            }
+            hazardManager.GetComponent<Spawning>().gameObjects = new List<GameObject>();
+            dead = false;
+
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "enemy")
+        if ((collision.tag == "enemy" || collision.tag == "Wide Enemy") && gameObject.tag == "Player")
         {
             Debug.Log("bonked");
+
+            dead = true;
         }
     }
 }

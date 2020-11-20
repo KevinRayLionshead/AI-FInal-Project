@@ -10,15 +10,16 @@ public class AI : MonoBehaviour
 {
     Jumping jumping;
     Crouch crouch;
+    public GameObject objectCollision;
 
-    int numOfSteps = 6000;
+    int numOfSteps = 1500;
     int counter = 0;
 
-    float gamma = 1;
+    float gamma = 0.9f;
 
-    enum Action { Idle, Jump, HighJump, Duck};
+    public enum Action { Idle, Jump, Duck, HighJump };
 
-    struct State
+    public struct State
     {
         //size = 2^number of bools
         //bool running;
@@ -46,15 +47,32 @@ public class AI : MonoBehaviour
     Vector<float> rewards;
     Vector<float> cumulativeRewards;
     
-    struct Samples
+    public struct Samples
     {
-        public List<State> curState;
-        public List<Action> action;
-        public List<State> nextState;
-        public List<int> freq;
+        public State curState;
+        public Action action;
+        public State nextState;
+        public int freq;
+
+        public bool Equals(Samples b)
+        {
+            return curState.Equals(b.curState) && action == b.action && nextState.Equals(b.nextState);
+        }
+
+        public static bool operator ==(Samples a, Samples b)
+        {
+            return a.curState.Equals(b.curState) && a.action == b.action && a.nextState.Equals(b.nextState);
+        }
+        public static bool operator !=(Samples a, Samples b)
+        {
+            return !(a.curState.Equals(b.curState) && a.action == b.action && a.nextState.Equals(b.nextState));
+        }
     }
 
-    Samples samples;
+    
+    
+
+    List<Samples> samples;
 
     struct ActionDec
     {
@@ -73,6 +91,10 @@ public class AI : MonoBehaviour
 
 
 
+
+
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -85,13 +107,7 @@ public class AI : MonoBehaviour
 
         stateList = new List<State>();
 
-        Samples temp;
-        temp.curState = new List<State>();
-        temp.action = new List<Action>();
-        temp.nextState = new List<State>();
-        temp.freq = new List<int>();
-
-        samples = temp;
+        samples = new List<Samples>();
 
         states = Vector<float>.Build.Dense(numOfStates);
         rewards = Vector<float>.Build.Dense(numOfStates);
@@ -103,7 +119,7 @@ public class AI : MonoBehaviour
         //    states[i] = i;
         //}
 
-        
+
         initialState.highJumping = false;
         initialState.jumping = false;
         initialState.ducking = false;
@@ -143,12 +159,48 @@ public class AI : MonoBehaviour
 
         for (int i = 0; i < numOfStates; i++)
         {
-            if (!stateList[i].dead && !stateList[i].objectInfront)
-                rewards[i] = 1;
-            else if (stateList[i].dead)
-                rewards[i] = -1;
+            //if (!stateList[i].dead && !stateList[i].objectInfront && !stateList[i].wideObject)
+            //    rewards[i] += 3;
+            //else if (stateList[i].objectInfront && !stateList[i].jumping)
+            //    rewards[i] += -2;
+            //else if (stateList[i].objectInfront && !stateList[i].ducking)
+            //    rewards[i] += 1;
+            //else if (stateList[i].dead)
+            //    rewards[i] += -10;
+
+            if (stateList[i].dead)
+                rewards[i] += -30;
             else
-                rewards[i] = 0;
+                rewards[i] += 1;
+            if (stateList[i].ducking)
+                rewards[i] += 1;
+            if (stateList[i].highJumping)
+                rewards[i] += 5;
+            if (stateList[i].jumping)
+                rewards[i] += 10;
+            if (stateList[i].objectInfront)
+                rewards[i] += -2;
+            else
+                rewards[i] += 1;
+            if (stateList[i].wideObject)
+                rewards[i] += -2;
+            else
+                rewards[i] += 1;
+
+            if (stateList[i].jumping && stateList[i].objectInfront)
+                rewards[i] += 10;
+            if (stateList[i].jumping && stateList[i].highJumping && stateList[i].wideObject)
+                rewards[i] += 10;
+
+            if (!stateList[i].jumping && stateList[i].objectInfront)
+                rewards[i] += -20;
+            if (!stateList[i].jumping && !stateList[i].highJumping && stateList[i].wideObject)
+                rewards[i] += -20;
+
+            if (!stateList[i].ducking && !stateList[i].dead && !stateList[i].highJumping
+                 && !stateList[i].jumping && !stateList[i].objectInfront && !stateList[i].wideObject)
+                rewards[i] += 25;
+
         }
 
     }
@@ -164,7 +216,15 @@ public class AI : MonoBehaviour
             }
             for (int j = 0; j < numOfStates; j++)
             {
-                pMatrix[i, j] /= rowSum;
+                if (rowSum == 0)
+                {
+                    pMatrix[i, j] = 0;
+                }
+                else
+                {
+                    pMatrix[i, j] /= rowSum;
+                }
+                
             }
         }
 
@@ -179,26 +239,39 @@ public class AI : MonoBehaviour
 
         if(counter < numOfSteps)
         {
+            
             int i = stateList.IndexOf(currentState);
             cumulativeRewards[i] += rewards[i];
 
-            if(samples.curState.Count < 1 || !samples.curState.Contains(currentState))
+            bool containsCurState = false;
+
+            for (int j = 0; j < samples.Count; j++)
             {
-                nextAction = (Action)Random.Range(0, 3);
+                if (samples[j].curState.Equals(currentState))
+                {
+                    containsCurState = true;
+                    break;
+                }
+            }
+
+            if(samples.Count < 1 || !containsCurState)
+            {
+                nextAction = (Action)Random.Range(0, 4);
+                
             }
             else
             {
                 int curStateFreq = 0;
                 List<ActionDec> actionsList = new List<ActionDec>();
 
-                for (int j = 0; j < samples.curState.Count; j++)
+                for (int j = 0; j < samples.Count; j++)
                 {
-                    if (samples.curState[j].Equals(currentState))
+                    if (samples[j].curState.Equals(currentState))
                     {
-                        curStateFreq += samples.freq[j];
+                        curStateFreq += samples[j].freq;
 
                         ActionDec temp;
-                        temp.action = samples.action[j];
+                        temp.action = samples[j].action;
                         temp.eval = 0;
                         actionsList.Add(temp);
                     }
@@ -207,14 +280,14 @@ public class AI : MonoBehaviour
 
                 for (int l = 0; l < actionsList.Count; l++)
                 {
-                    for (int j = 0; j < samples.action.Count; j++)
+                    for (int j = 0; j < samples.Count; j++)
                     {
-                        if (actionsList[l].action == samples.action[j] && samples.curState.Equals(currentState))
+                        if (actionsList[l].action == samples[j].action && samples[j].curState.Equals(currentState))
                         {
                             ActionDec temp1;
                             temp1 = actionsList[l];
                             
-                            temp1.eval += states[stateList.IndexOf(samples.nextState[j])] * samples.freq[j];
+                            temp1.eval += states[stateList.IndexOf(samples[j].nextState)] * samples[j].freq;
                             actionsList[l] = temp1;
                         }
                     }
@@ -231,54 +304,95 @@ public class AI : MonoBehaviour
                     if (actionsList[j].eval > maxEval)
                         nextAction = actionsList[j].action;
                 }
-                nextState = currentState;
-                switch (nextAction)
-                {
-                    case Action.Idle:
-                        nextState.ducking = false;
-                        nextState.highJumping = false;
-                        nextState.jumping = false;
-                        break;
-                    case Action.Duck:
-                        nextState.ducking = true;
-                        nextState.highJumping = false;
-                        nextState.jumping = false;
-                        break;
-                    case Action.HighJump:
-                        nextState.ducking = false;
-                        nextState.highJumping = true;
-                        nextState.jumping = false;
-                        break;
-                    case Action.Jump:
-                        nextState.ducking = false;
-                        nextState.highJumping = false;
-                        nextState.jumping = true;
-                        break;
-
-                }
-
-                //Getter functions here for obj in front, wide obj and dead.
-
-                //nextState.jumping = jumping.GetJump();
-                //nextState.ducking = crouch.GetCrouch();
-
-
-
-
-                int k = stateList.IndexOf(nextState);
-
-                pMatrix[i, k] += 1;
-
-                currentState = nextState;
+                
 
             }
+
+            nextState = currentState;
+            switch (nextAction)
+            {
+                case Action.Idle:
+                    nextState.ducking = false;
+                    nextState.highJumping = false;
+                    nextState.jumping = false;
+                    break;
+                case Action.Duck:
+                    nextState.ducking = true;
+                    nextState.highJumping = false;
+                    nextState.jumping = false;
+                    break;
+                case Action.HighJump:
+                    nextState.ducking = false;
+                    nextState.highJumping = true;
+                    nextState.jumping = false;
+                    break;
+                case Action.Jump:
+                    nextState.ducking = false;
+                    nextState.highJumping = false;
+                    nextState.jumping = true;
+                    break;
+
+            }
+
+            //Getter functions here for obj in front, wide obj and dead.
+
+            nextState.objectInfront = objectCollision.GetComponent<ObjectCollision>().objectInfront;
+            nextState.wideObject = objectCollision.GetComponent<ObjectCollision>().wideObject;
+
+            nextState.dead = crouch.dead;
+
+
+
+
+
+
+            int k = stateList.IndexOf(nextState);
+
+            pMatrix[i, k] += 1;
+
+            
+
+            
+            Samples tempSample = new Samples();
+
+            tempSample.curState = currentState;
+            tempSample.action = nextAction;
+            tempSample.freq = 1;
+
+            if (samples.Contains(tempSample))
+            {
+                tempSample.freq = samples[samples.IndexOf(tempSample)].freq;
+                samples[samples.IndexOf(tempSample)] = tempSample;
+
+            }
+            else
+            {
+                samples.Add(tempSample);
+            }
+
+           
+
+            currentState = nextState;
+
+            jumping.SetJump(currentState.jumping);
+            jumping.SetHighJump(currentState.highJumping);
+            crouch.SetCrouch(currentState.ducking);
+
 
         }
         else
         {
+            Debug.Log("Finished "+ numOfSteps);
             CreateProbMat();
 
             states = (identity - (gamma * pMatrix)).Inverse() * cumulativeRewards;
+
+            counter = 0;
+            pMatrix = Matrix<float>.Build.Dense(numOfStates, numOfStates);
+
+
+
+            samples.Clear();
 
         }
 

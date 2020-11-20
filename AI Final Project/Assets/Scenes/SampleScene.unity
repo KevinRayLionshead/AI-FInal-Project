@@ -157,6 +157,7 @@ MonoBehaviour:
   doubleCactus: {fileID: 8878661031367897462, guid: f4f508d7c8f78df45af79c11157b2154,
     type: 3}
   bird: {fileID: 3104867004849235562, guid: 383e07ea26f72264e94e0a8a0336ad97, type: 3}
+  gameObjects: []
 --- !u!4 &414748333
 Transform:
   m_ObjectHideFlags: 0
@@ -169,7 +170,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &453368874
 GameObject:
@@ -186,9 +187,10 @@ GameObject:
   - component: {fileID: 453368875}
   - component: {fileID: 453368879}
   - component: {fileID: 453368880}
+  - component: {fileID: 453368882}
   m_Layer: 0
   m_Name: Dino Boi
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -303,7 +305,7 @@ Transform:
   m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &453368879
 MonoBehaviour:
@@ -320,6 +322,7 @@ MonoBehaviour:
   jumpVelocity: 7
   fallMultiplier: 3
   lowJumpMultiplier: 2
+  highJump: 0
 --- !u!114 &453368880
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -336,6 +339,8 @@ MonoBehaviour:
   crouchBox: {fileID: 453368881}
   tallDino: {fileID: 21300000, guid: b493054147b5d5a4b81c615f1d0c4445, type: 3}
   crouchDino: {fileID: 21300000, guid: 20f25f0df0a15b9489c818e898c40c9a, type: 3}
+  dead: 0
+  hazardManager: {fileID: 414748331}
 --- !u!61 &453368881
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -362,6 +367,19 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 2.59, y: 0.96}
   m_EdgeRadius: 0
+--- !u!114 &453368882
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 453368874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0787766ae01c79f41ad12e3d38ad8169, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectCollision: {fileID: 1049377788}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -439,7 +457,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 0, y: 1.82, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -554,6 +572,101 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.16, y: 0.16}
   m_EdgeRadius: 0
+--- !u!1 &1049377788
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1049377791}
+  - component: {fileID: 1049377790}
+  - component: {fileID: 1049377789}
+  - component: {fileID: 1049377792}
+  m_Layer: 0
+  m_Name: Collider
+  m_TagString: InFrontCollider
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1049377789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1049377788}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae591dcb0052fa24baf9ec5995554474, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  objectInfront: 0
+  wideObject: 0
+  dino: {fileID: 453368874}
+--- !u!61 &1049377790
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1049377788}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 2.1, y: 0.52}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 2.59, y: 1.94}
+    newSize: {x: 2.59, y: 1.94}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 2.67, y: 2}
+  m_EdgeRadius: 0
+--- !u!4 &1049377791
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1049377788}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -7.02, y: 1.69, z: -5.524481}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!50 &1049377792
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1049377788}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!850595691 &1836173969
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -707,7 +820,7 @@ PrefabInstance:
     - target: {fileID: 32766051263001092, guid: 22c7d7f6f0d502d47af2e5c6f5d8ed8e,
         type: 3}
       propertyPath: m_RootOrder
-      value: 5
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 32766051263001092, guid: 22c7d7f6f0d502d47af2e5c6f5d8ed8e,
         type: 3}
