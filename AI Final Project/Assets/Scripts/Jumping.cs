@@ -54,12 +54,12 @@ public class Jumping : MonoBehaviour
     {
         if (jump)//where the jump happens
         {
-            rigidbody2D.velocity += Vector2.up * 5;
+            rigidbody2D.velocity += Vector2.up * 7;
             jump = false;
         }
         else if (highJump)
         {
-            rigidbody2D.velocity += Vector2.up * 5;
+            rigidbody2D.velocity += Vector2.up * 7;
             highJump = false;
         }
 
