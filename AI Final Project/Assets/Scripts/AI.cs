@@ -12,34 +12,34 @@ public class AI : MonoBehaviour
     Crouch crouch;
     public GameObject objectCollision;
 
-    int numOfSteps = 1500;
-    int counter = 0;
+    int numOfSteps = 1500;//these are the steps the AI goes through for each iteration
+    int counter = 0;//the counter for the steps
 
     float gamma = 0.9f;
 
-    public enum Action { Idle, Jump, Duck, HighJump };
+    public enum Action { Idle, Jump, Duck, HighJump };//the 4 actions the AI can perform
 
-    public struct State
+    public struct State//struct holding the different states
     {
         //size = 2^number of bools
         //bool running;
-        public bool highJumping;
-        public bool jumping;
-        public bool ducking;
-        public bool dead;
+        public bool highJumping;//high jump state
+        public bool jumping;//regular jump state
+        public bool ducking;//ducking state
+        public bool dead;// dead state
 
-        public bool objectInfront;
-        public bool wideObject;
+        public bool objectInfront;//a state for when a cactus is in front of the AI
+        public bool wideObject;//a state where there is a double cactus in front of the AI
     };
-    int numOfStates = (int)Mathf.Pow(2, 6.0f);
+    int numOfStates = (int)Mathf.Pow(2, 6.0f);// this number is the number of Unique states that can take place
     
 
-    Matrix<float> pMatrix;
-    Matrix<float> identity;
+    Matrix<float> pMatrix;//probability matrix
+    Matrix<float> identity;//identity matrix
     
 
-    State initialState;
-    State currentState;
+    State initialState;//previous state to check against
+    State currentState;//current state that AI is in
 
     List<State> stateList;
 
@@ -47,23 +47,28 @@ public class AI : MonoBehaviour
     Vector<float> rewards;
     Vector<float> cumulativeRewards;
     
-    public struct Samples
+    public struct Samples//creates a sample struct
     {
-        public State curState;
-        public Action action;
-        public State nextState;
-        public int freq;
+        public State curState;// the current state
+        public Action action;//the current action
+        public State nextState;//the next state
+        public int freq;//frequency
 
-        public bool Equals(Samples b)
+        public override bool Equals(object b)// operator for allowing the equals of 2 samples
         {
-            return curState.Equals(b.curState) && action == b.action && nextState.Equals(b.nextState);
+            if (!(b is Samples))
+            { return false; }
+
+            Samples otherSample = (Samples)b;
+
+            return curState.Equals(otherSample.curState) && action == otherSample.action && nextState.Equals(otherSample.nextState);
         }
 
-        public static bool operator ==(Samples a, Samples b)
+        public static bool operator ==(Samples a, Samples b) //operator for comparing samples
         {
             return a.curState.Equals(b.curState) && a.action == b.action && a.nextState.Equals(b.nextState);
         }
-        public static bool operator !=(Samples a, Samples b)
+        public static bool operator !=(Samples a, Samples b)//operator for also comapring samples for inequality
         {
             return !(a.curState.Equals(b.curState) && a.action == b.action && a.nextState.Equals(b.nextState));
         }
@@ -90,28 +95,23 @@ public class AI : MonoBehaviour
     //r is colum vector (size num of states) keeps track of current reward for all states
 
 
-
-
-
-
-
     // Start is called before the first frame update
     void Start()
     {
-        jumping = gameObject.GetComponent<Jumping>();
-        crouch = gameObject.GetComponent<Crouch>();
+        jumping = gameObject.GetComponent<Jumping>();//adds a reference to the jumping script
+        crouch = gameObject.GetComponent<Crouch>();//adds a reference to the crouching script
 
-        pMatrix = Matrix<float>.Build.Dense(numOfStates, numOfStates);
-        identity = Matrix<float>.Build.DenseIdentity(numOfStates);
+        pMatrix = Matrix<float>.Build.Dense(numOfStates, numOfStates);//creates a probability matrix the size of the number of unique states
+        identity = Matrix<float>.Build.DenseIdentity(numOfStates);//creates a matrix the same size but as an identity matrix
         Debug.Log(identity);
 
         stateList = new List<State>();
 
         samples = new List<Samples>();
 
-        states = Vector<float>.Build.Dense(numOfStates);
-        rewards = Vector<float>.Build.Dense(numOfStates);
-        cumulativeRewards = Vector<float>.Build.Dense(numOfStates);
+        states = Vector<float>.Build.Dense(numOfStates);//creates an array/vector for storing the number of single states
+        rewards = Vector<float>.Build.Dense(numOfStates);//creates a vector that holds the reward for each state
+        cumulativeRewards = Vector<float>.Build.Dense(numOfStates);//holds the sum of all rewards each state received
 
 
         //for (int i = 0; i < numOfStates; i++)
@@ -119,7 +119,7 @@ public class AI : MonoBehaviour
         //    states[i] = i;
         //}
 
-
+        //sets all states to false for the start
         initialState.highJumping = false;
         initialState.jumping = false;
         initialState.ducking = false;
@@ -127,11 +127,11 @@ public class AI : MonoBehaviour
         initialState.objectInfront = false;
         initialState.wideObject = false;
 
-        currentState = initialState;
+        currentState = initialState;//sets current state to blank
 
-        State tempState = new State();
+        State tempState = new State();//holds all the unique states temporarily
 
-        for (int a = 0; a < 2; a++)
+        for (int a = 0; a < 2; a++)//these for loops combine each state to get all unique possible states
         {
             tempState.highJumping = (a == 1);
             for (int b = 0; b < 2; b++)
@@ -157,7 +157,7 @@ public class AI : MonoBehaviour
             }
         }
 
-        for (int i = 0; i < numOfStates; i++)
+        for (int i = 0; i < numOfStates; i++)// This for loop sets the reward/punish amount for each of the single states
         {
             //if (!stateList[i].dead && !stateList[i].objectInfront && !stateList[i].wideObject)
             //    rewards[i] += 3;
@@ -168,51 +168,51 @@ public class AI : MonoBehaviour
             //else if (stateList[i].dead)
             //    rewards[i] += -10;
 
-            if (stateList[i].dead)
+            if (stateList[i].dead)//sets punish for death
                 rewards[i] += -30;
             else
                 rewards[i] += 1;
-            if (stateList[i].ducking)
+            if (stateList[i].ducking)//sets reward for ducking
                 rewards[i] += 1;
-            if (stateList[i].highJumping)
+            if (stateList[i].highJumping)//sets reward for highjump
                 rewards[i] += 5;
-            if (stateList[i].jumping)
+            if (stateList[i].jumping)//sets reward for regular jump
                 rewards[i] += 10;
-            if (stateList[i].objectInfront)
+            if (stateList[i].objectInfront)//sets punish for when a cactus is in front of AI
                 rewards[i] += -2;
             else
                 rewards[i] += 1;
-            if (stateList[i].wideObject)
+            if (stateList[i].wideObject)//sets punish for when a double cactus is in from of AI
                 rewards[i] += -2;
             else
                 rewards[i] += 1;
 
-            if (stateList[i].jumping && stateList[i].objectInfront)
+            if (stateList[i].jumping && stateList[i].objectInfront)// sets reward for jumping when in front of cactus
                 rewards[i] += 10;
-            if (stateList[i].jumping && stateList[i].highJumping && stateList[i].wideObject)
+            if (stateList[i].jumping && stateList[i].highJumping && stateList[i].wideObject)// sets reward for jumping when in front of double cactus
                 rewards[i] += 10;
 
-            if (!stateList[i].jumping && stateList[i].objectInfront)
+            if (!stateList[i].jumping && stateList[i].objectInfront)// sets punish for not jumping when in front of cactus
                 rewards[i] += -20;
-            if (!stateList[i].jumping && !stateList[i].highJumping && stateList[i].wideObject)
+            if (!stateList[i].jumping && !stateList[i].highJumping && stateList[i].wideObject)// sets punish for not high jumping when in front of double cactus
                 rewards[i] += -20;
 
             if (!stateList[i].ducking && !stateList[i].dead && !stateList[i].highJumping
                  && !stateList[i].jumping && !stateList[i].objectInfront && !stateList[i].wideObject)
-                rewards[i] += 25;
+                rewards[i] += 25;// if surviving it will get rewarded
 
         }
 
     }
 
-    void CreateProbMat()
+    void CreateProbMat()//creates a probability matrix
     {
         for (int i = 0; i < numOfStates; i++)
         {
             float rowSum = 0;
             for (int j = 0; j < numOfStates; j++)
             {
-                rowSum += pMatrix[i, j];
+                rowSum += pMatrix[i, j];//keeps tab of the frequency each state has been triggered
             }
             for (int j = 0; j < numOfStates; j++)
             {
@@ -222,8 +222,8 @@ public class AI : MonoBehaviour
                 }
                 else
                 {
-                    pMatrix[i, j] /= rowSum;
-                }
+                    pMatrix[i, j] /= rowSum;//divides each cell by the row sum to get a 0-1 value
+                }// all the values combined will get you a total of 1 making it a probability matrix
                 
             }
         }
@@ -237,15 +237,15 @@ public class AI : MonoBehaviour
 
         Action nextAction = new Action();
 
-        if(counter < numOfSteps)
+        if(counter < numOfSteps)//will go into this if until each iteration is done
         {
             
-            int i = stateList.IndexOf(currentState);
+            int i = stateList.IndexOf(currentState);//sets the reward for the current state
             cumulativeRewards[i] += rewards[i];
 
             bool containsCurState = false;
 
-            for (int j = 0; j < samples.Count; j++)
+            for (int j = 0; j < samples.Count; j++)//figures out which state is the current state
             {
                 if (samples[j].curState.Equals(currentState))
                 {
@@ -254,7 +254,7 @@ public class AI : MonoBehaviour
                 }
             }
 
-            if(samples.Count < 1 || !containsCurState)
+            if(samples.Count < 1 || !containsCurState)//if there is no sample to follow a random action will be chosen
             {
                 nextAction = (Action)Random.Range(0, 4);
                 
@@ -262,23 +262,23 @@ public class AI : MonoBehaviour
             else
             {
                 int curStateFreq = 0;
-                List<ActionDec> actionsList = new List<ActionDec>();
+                List<ActionDec> actionsList = new List<ActionDec>();//create a list of actions
 
                 for (int j = 0; j < samples.Count; j++)
                 {
-                    if (samples[j].curState.Equals(currentState))
+                    if (samples[j].curState.Equals(currentState))//checks to see if the samples current state is the same as this current state
                     {
-                        curStateFreq += samples[j].freq;
+                        curStateFreq += samples[j].freq;//gets the frequency of all the samples in the subset
 
                         ActionDec temp;
                         temp.action = samples[j].action;
                         temp.eval = 0;
-                        actionsList.Add(temp);
+                        actionsList.Add(temp);//adds to the list fo actions if the current state is the same
                     }
                 }
 
 
-                for (int l = 0; l < actionsList.Count; l++)
+                for (int l = 0; l < actionsList.Count; l++)//breaks down the samples into subsamples
                 {
                     for (int j = 0; j < samples.Count; j++)
                     {
@@ -286,7 +286,8 @@ public class AI : MonoBehaviour
                         {
                             ActionDec temp1;
                             temp1 = actionsList[l];
-                            
+
+                            //adjusts the evaluation of each state for the best move to get the best reward
                             temp1.eval += states[stateList.IndexOf(samples[j].nextState)] * samples[j].freq;
                             actionsList[l] = temp1;
                         }
@@ -299,7 +300,7 @@ public class AI : MonoBehaviour
 
                 float maxEval = 0;
                 
-                for (int j = 0; j < actionsList.Count; j++)
+                for (int j = 0; j < actionsList.Count; j++)// this for loop finds the action with the greatest average
                 {
                     if (actionsList[j].eval > maxEval)
                         nextAction = actionsList[j].action;
@@ -309,7 +310,7 @@ public class AI : MonoBehaviour
             }
 
             nextState = currentState;
-            switch (nextAction)
+            switch (nextAction)//performs the action with the highest average
             {
                 case Action.Idle:
                     nextState.ducking = false;
@@ -338,7 +339,6 @@ public class AI : MonoBehaviour
 
             nextState.objectInfront = objectCollision.GetComponent<ObjectCollision>().objectInfront;
             nextState.wideObject = objectCollision.GetComponent<ObjectCollision>().wideObject;
-
             nextState.dead = crouch.dead;
 
 
@@ -348,24 +348,24 @@ public class AI : MonoBehaviour
 
             int k = stateList.IndexOf(nextState);
 
-            pMatrix[i, k] += 1;
+            pMatrix[i, k] += 1; //This keeps track of this current states next state
 
             
 
             
-            Samples tempSample = new Samples();
+            Samples tempSample = new Samples();//creates a temp sample for the below if statement
 
             tempSample.curState = currentState;
             tempSample.action = nextAction;
             tempSample.freq = 1;
 
-            if (samples.Contains(tempSample))
+            if (samples.Contains(tempSample))//this adds up the frequency of the samples for probability calculations
             {
-                tempSample.freq = samples[samples.IndexOf(tempSample)].freq;
+                tempSample.freq += samples[samples.IndexOf(tempSample)].freq;
                 samples[samples.IndexOf(tempSample)] = tempSample;
 
             }
-            else
+            else//if the sample has not been added yet then it will add it
             {
                 samples.Add(tempSample);
             }
@@ -373,30 +373,32 @@ public class AI : MonoBehaviour
            
 
             currentState = nextState;
-
+            //sets the state for the current state
             jumping.SetJump(currentState.jumping);
             jumping.SetHighJump(currentState.highJumping);
             crouch.SetCrouch(currentState.ducking);
 
 
         }
-        else
+        else//this is for when the next iteration is coming
         {
             Debug.Log("Finished "+ numOfSteps);
-            CreateProbMat();
+            CreateProbMat();//calls the create probability matrix
 
+            // this states vector takes in probability matrix * the gamma(or discount term) which you then take the inverse matrix of
+            // and multiply it with the cumulative rewards vector to iterate on the states vector whcih represents the value estimate for all states
             states = (identity - (gamma * pMatrix)).Inverse() * cumulativeRewards;
 
-            counter = 0;
-            pMatrix = Matrix<float>.Build.Dense(numOfStates, numOfStates);
+            counter = 0;//resest the counter
+            pMatrix = Matrix<float>.Build.Dense(numOfStates, numOfStates);//resets probability matrix to all zeroes
 
 
 
-            samples.Clear();
+            samples.Clear();//clears the samples to start from scratch
 
         }
 
 
-        counter++;
+        counter++;//increase the count for the steps
     }
 }
