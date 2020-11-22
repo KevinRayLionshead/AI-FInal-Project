@@ -20,6 +20,8 @@ public class Crouch : MonoBehaviour
     [SerializeField]
     Sprite crouchDino;//crouch sprite
 
+    AudioSource audioSource;
+
     bool crouchKey;
     public bool dead;
 
@@ -43,6 +45,7 @@ public class Crouch : MonoBehaviour
 
         rigidbody2D = GetComponent<Rigidbody2D>();//sets components to the attached ones
         spriteRenderer = GetComponent<SpriteRenderer>();
+        audioSource = GetComponent<AudioSource>();
 
         normalBox.enabled = true;
         crouchBox.enabled = false;
@@ -66,7 +69,7 @@ public class Crouch : MonoBehaviour
             
         }
 
-        if(dead)
+        if(dead)//whe nthe player dies all of the hazards on screen will be destroyed resetting the stage
         {
             for (int i = 0; i < hazardManager.GetComponent<Spawning>().gameObjects.Count; i++)
             {
@@ -84,8 +87,8 @@ public class Crouch : MonoBehaviour
         if ((collision.tag == "enemy" || collision.tag == "Wide Enemy") && gameObject.tag == "Player")
         {
             Debug.Log("bonked");
-
-            dead = true;
+            audioSource.Play();//plays the death sound here
+            dead = true;//AI dies if collision is with the cactus
         }
     }
 }
